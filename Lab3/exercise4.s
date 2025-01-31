@@ -1,0 +1,21 @@
+	AREA RESET, DATA, READONLY
+	EXPORT __Vectors
+__Vectors
+	DCD 0X10001000
+	DCD Reset_Handler
+	ALIGN
+	AREA mycode, CODE, READONLY
+	ENTRY
+	EXPORT Reset_Handler
+Reset_Handler
+	LDR R0, =N
+	LDR R1,[R0]
+	MLA R2, R1, R1, R1
+	MOV R3, R2, LSR #1
+	LDR R4, =SUM
+	STR R3, [R4]
+STOP B STOP
+N DCD 10
+	AREA mydata, DATA, READWRITE
+SUM DCD 0
+	END
