@@ -1,0 +1,62 @@
+	AREA RESET, DATA, READONLY
+	EXPORT __Vectors
+__Vectors
+	DCD 0X10001000
+	DCD Reset_Handler
+	ALIGN
+	AREA mycode, CODE, READONLY
+	ENTRY
+	EXPORT Reset_Handler
+Reset_Handler
+	LDR R0, =N1
+	LDR R0, [R0]
+	LDR R1, =N2
+	LDR R1, [R1]
+
+GCD_LOOP
+	CMP R1, #0
+	BEQ STORE
+	MOV R2, R1		;R2 = B
+	BL DIV
+	MOV R1, R0 		;B = A % B
+	MOV R0, R2		;A = B
+	B GCD_LOOP
+
+STORE
+	LDR R2, =GCD
+	STR R0, [R2]
+LCM_CAL
+	LDR R2, =LCM
+	LDR R3, =N1
+	LDR R3, [R3]
+	LDR R4, =N2
+	LDR R4, [R4]
+	
+	MUL R5, R3, R4		;A * B
+	MOV R0, R5
+	LDR R1, =GCD
+	LDR R1, [R1]
+	BL DIV
+	STR R3, [R2]
+	
+STOP 
+	B STOP
+	
+DIV
+	MOV R3, #0		;QUOTIENT
+DIVLOOP
+	CMP R0, R1
+	BLT DONE
+	SUB R0, R0, R1
+	ADD R3, R3, #1
+	B DIVLOOP
+	
+DONE 
+	BX LR
+	
+N1 DCD 24
+N2 DCD 9
+	AREA mydata, DATA, READWRITE
+GCD DCD 0
+LCM DCD 0
+	END
