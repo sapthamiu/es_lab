@@ -16,19 +16,19 @@ Reset_Handler
 	B STOP
 
 FACT
-	CMP R0, #1			;BASE CASE N<=1
+	CMP R0, #1				;BASE CASE N<=1
 	BLS ENDFACT
 	
 	PUSH {R0, LR}			;PUSH RETURN ADDRESS TO STACK
-	SUB R0, R0, #1		;N-1
+	SUB R0, R0, #1			;N-1
 	BL FACT
 	
 	POP {R1, LR}			;POP RETURN ADDRESS FROM STACK TO R1
-	MUL R0, R0, R1		;N*FACT(N-1)
+	MUL R0, R0, R1			;N*FACT(N-1)
 	BX LR
 
 ENDFACT
-	MOV R0, #1			;return 1 for base case
+	MOV R0, #1				;return 1 for base case
 	BX LR
 
 
