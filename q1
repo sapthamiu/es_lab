@@ -1,0 +1,51 @@
+#include <LPC17xx.h>
+
+unsigned char digits[10] = {0x3F, 0x06, 0x5B, 0x4F, 0x66, 
+                            0x6D, 0x7D, 0x07, 0x7F, 0x6F};  // 7-segment encoding for 0-9
+
+unsigned int i;
+
+// Function to create a short delay
+void delay(void) {
+    for (i = 0; i < 3000; i++);  // Small delay for multiplexing
+}
+
+// Function to display a single digit at a specific position
+void displayDigit(int digit, int position) {
+    LPC_GPIO0->FIOCLR = 0x00003FF0;  // Clear segment values (P0.4 - P0.10)
+    LPC_GPIO1->FIOCLR = (15 << 23);  // Clear digit select (P1.23 - P1.26)
+    
+    // Set segment values for the digit (P0.4 - P0.10)
+    LPC_GPIO0->FIOSET = (digits[digit] << 4) & 0x000007F0;
+    
+    // Activate the corresponding digit (P1.23 - P1.26)
+    switch (position) {
+        case 0: LPC_GPIO1->FIOSET = (1 << 23); break;  // Rightmost digit
+        case 1: LPC_GPIO1->FIOSET = (1 << 24); break;  // 2nd digit
+        case 2: LPC_GPIO1->FIOSET = (1 << 25); break;  // 3rd digit
+        case 3: LPC_GPIO1->FIOSET = (1 << 26); break;  // Leftmost digit
+    }
+    
+    delay();  // Short delay for persistence
+}
+
+int main(void) {
+    SystemInit();
+    SystemCoreClockUpdate();
+
+    LPC_PINCON->PINSEL0 &= 0xF0000FFF;  // P0.4 - P0.10 as GPIO (segments)
+    LPC_PINCON->PINSEL3 &= 0xF07FFFFF;  // P1.23 - P1.26 as GPIO (digit select)
+    
+    LPC_GPIO0->FIODIR |= 0x00003FF0;    // Set P0.4 - P0.10 as output
+    LPC_GPIO1->FIODIR |= (15 << 23);    // Set P1.23 - P1.26 as output
+
+    int num = 1234;  // Number to display
+    int digitsArray[4] = {num % 10, (num / 10) % 10, (num / 100) % 10, (num / 1000) % 10};  // Extract digits
+    
+    while (1) {
+        displayDigit(digitsArray[0], 0);  // Display rightmost digit (4)
+        displayDigit(digitsArray[1], 1);  // Display 2nd digit (3)
+        displayDigit(digitsArray[2], 2);  // Display 3rd digit (2)
+        displayDigit(digitsArray[3], 3);  // Display leftmost digit (1)
+    }
+}
