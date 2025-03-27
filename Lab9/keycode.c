@@ -1,8 +1,8 @@
 #include<lpc17xx.h>
 #include "Lab8/LCDmessage.c"
-unsigned char msg1[15] = "KEY PRESSED = ";
+unsigned char msg1[] = "KEY PRESSED = ";
 unsigned char row, var, flag, key;
-unsigned long int i, var1, temp, temp1, temp2. temp3;
+unsigned long int i, var1, temp, temp1, temp2, temp3;
 unsigned char scan_code[16] = {
     0x11, 0x21, 0x41, 0x81,
     0x12, 0x22, 0x42, 0x82,
@@ -19,8 +19,8 @@ void scan(void){
     if(temp3 != 0x00000000){
         flag = 1;
         temp3 >>= 19;   //shift to higher nibble of byte
-        temp >>= 10;    //shifted to lower nibble of byte
-        key = temp3 | temp;     //get scan code
+        temp >>= 10;    //shift to lower nibble of byte
+        key = temp3 | temp;     //get scan code //key = temp3 | (var1 >> 10) ?
     }
 }
 
@@ -33,37 +33,37 @@ int main(void){
     lcd_init();
     lcd_comdata(0x80);  //point to first line of LCD
     delay_lcd(800);
-    lcd_puts(&msg1[0]);
+    lcd_puts(msg1);
+    //while(1){
     while(1){
-        while(1){
-            for(row = 1; row < 5; row++){
-                if(row == 1)
-                    var1 = 0x00000400;
-                else if(row == 2)
-                    var1 = 0x00000800;
-                else if(row == 3)
-                    var1 = 0x00001000;
-                else if(row == 4)
-                    var1 = 0x00002000;
-                temp = var1;
-                LPC_GPIO2->FIOCLR = 0x00003C00;
-                LPC_GPIO2->FIOSET = var1;   //enable the row
-                flag = 0;
-                scan();
-                if(flag == 1)
-                    break;
+        flag = 0;
+        for(row = 1; row < 5; row++){
+            switch (row) {
+                case 1: var1 = 0x00000400; break;
+                case 2: var1 = 0x00000800; break;
+                case 3: var1 = 0x00001000; break;
+                case 4: var1 = 0x00002000; break;
             }
+            temp = var1;
+            LPC_GPIO2->FIOCLR = 0x00003C00;
+            LPC_GPIO2->FIOSET = var1;   //enable the row
+            // flag = 0;
+            scan();
             if(flag == 1)
                 break;
         }
-        for(i = 0; i < 16; i++){
-            if(key == scan_code[i]){
-                key = ascii_code[i];
-                break;
-            }
+        // if(flag == 1)
+        //     break;
+        if(flag == 1){
+            for(i = 0; i < 16; i++)
+                if(key == scan_code[i]){
+                    key = ascii_code[i];
+                    break;
+                }
+            lcd_comdata(0xc0);
+            delay_lcd(800);
+            char keystr[2] = {key, '\0'};
+            lcd_puts(keystr);
         }
-        lcd_comdata(0xc0);
-        delay_lcd(800);
-        lcd_puts(&key);
     }
 }

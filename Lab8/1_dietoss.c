@@ -4,11 +4,11 @@ int die_roll = 1;
 void clear_ports(void){
     LPC_GPIO0->FIOCLR = 0x0F << 23;
     LPC_GPIO0->FIOCLR = 1 << 27;
-    LPC_GPIO->FIOCLR = 1 << 28;
+    LPC_GPIO0->FIOCLR = 1 << 28;
 }
-void delay_lcd(unsigned int r1){
+void delay_lcd(unsigned int count){
     unsigned int r;
-    for(r = 0; r < r1; r++);
+    for(r = 0; r < count; r++);
 }
 void write(int temp2, int type){
     clear_ports();
