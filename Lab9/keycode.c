@@ -1,6 +1,6 @@
 #include<lpc17xx.h>
-#include "Lab8/LCDmessage.c"
-unsigned char msg1[] = "KEY PRESSED = ";
+#include "lcdmsg.c"
+unsigned char msg1[] = "KEY PRESSED=";
 unsigned char row, var, flag, key;
 unsigned long int i, var1, temp, temp1, temp2, temp3;
 unsigned char scan_code[16] = {
@@ -16,7 +16,7 @@ unsigned char ascii_code[16] = {
 void scan(void){
     temp3 = LPC_GPIO1->FIOPIN;
     temp3 &= 0x07800000; //check if any key is pressed in the enabled row
-    if(temp3 != 0x00000000){
+    if(temp3 != 0x0){
         flag = 1;
         temp3 >>= 19;   //shift to higher nibble of byte
         temp >>= 10;    //shift to lower nibble of byte
@@ -31,12 +31,12 @@ int main(void){
     clear_ports();
     delay_lcd(3200);
     lcd_init();
-    lcd_comdata(0x80);  //point to first line of LCD
+    lcd_comdata(0x80,0);  //point to first line of LCD
     delay_lcd(800);
-    lcd_puts(msg1);
-    //while(1){
+    lcd_puts(&msg1[0]);
     while(1){
-        flag = 0;
+			while(1){
+        //flag = 0;
         for(row = 1; row < 5; row++){
             switch (row) {
                 case 1: var1 = 0x00000400; break;
@@ -47,23 +47,21 @@ int main(void){
             temp = var1;
             LPC_GPIO2->FIOCLR = 0x00003C00;
             LPC_GPIO2->FIOSET = var1;   //enable the row
-            // flag = 0;
+            flag = 0;
             scan();
             if(flag == 1)
                 break;
         }
-        // if(flag == 1)
-        //     break;
-        if(flag == 1){
-            for(i = 0; i < 16; i++)
-                if(key == scan_code[i]){
-                    key = ascii_code[i];
-                    break;
-                }
-            lcd_comdata(0xc0);
-            delay_lcd(800);
-            char keystr[2] = {key, '\0'};
-            lcd_puts(keystr);
+        if(flag == 1)
+             break;
+				for(i = 0; i < 16; i++)
+						if(key == scan_code[i]){
+								key = ascii_code[i];
+								break;
+						}
+				lcd_comdata(0xc0,0);
+				delay_lcd(800);
+				lcd_puts(&key);
         }
     }
 }
