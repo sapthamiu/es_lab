@@ -1,4 +1,4 @@
-#include<lpc17xx.h>
+#include<LPC17xx.h>
 void clear_ports(void){
     LPC_GPIO0->FIOCLR = 0x0F << 23; //clear data lines
     LPC_GPIO0->FIOCLR = 1 << 27;    //clear RS line
@@ -29,7 +29,7 @@ void lcd_comdata(int temp1, int type){
     return;
 }
 void lcd_init(void){
-    LPC_PINCON->PINSEL1 &= ~(0x3FFC << 12); //P0.23 to P0.28 as GPIO
+    LPC_PINCON->PINSEL1 &= 0xFC003FFF; //P0.23 to P0.28 as GPIO
     LPC_GPIO0->FIODIR |= 0x0F << 23 | 1 << 27 | 1 << 28; //set direction as output for data lines, RS line and Enable line
     clear_ports();
     delay_lcd(3200);
@@ -59,8 +59,8 @@ void lcd_puts(unsigned char* buf1){
     return;
 }
 int main(void){
-    unsigned char msg1[4] = {"MIT"};
-    unsigned char msg2[19] = {"Department of CSE"};
+    unsigned char msg1[] = {"MIT"};
+    unsigned char msg2[] = {"Department of CS"};
     SystemInit();
     SystemCoreClockUpdate();
     lcd_init();
