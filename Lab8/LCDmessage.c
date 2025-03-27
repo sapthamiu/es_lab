@@ -3,12 +3,10 @@ void clear_ports(void){
     LPC_GPIO0->FIOCLR = 0x0F << 23; //clear data lines
     LPC_GPIO0->FIOCLR = 1 << 27;    //clear RS line
     LPC_GPIO0->FIOCLR = 1 << 28;    //clear Enable line
-    return;
 }
 void delay_lcd(unsigned int r1){
     unsigned int r;
     for(r = 0; r < r1; r++);
-    return;
 }
 void write(int temp2, int type){
     clear_ports();
@@ -23,11 +21,9 @@ void write(int temp2, int type){
     return;
 }
 void lcd_comdata(int temp1, int type){
-    int temp2 = temp1 & 0xF0;   // move data 26-8+1 times
-    temp2 <<= 19; 
+    int temp2 = (temp1 & 0xF0) << 19;   // move data 26-8+1 times (higher nibble)
     write(temp2, type);
-    temp2 = temp1 & 0x0F;       //move data 26-4+1 times
-    temp2 <<= 23;
+    temp2 = (temp1 & 0x0F) << 23;       //move data 26-4+1 times (lower nibble)
     write(temp2, type);
     delay_lcd(1000);
     return;
@@ -42,9 +38,9 @@ void lcd_init(void){
     delay_lcd(30000);
     lcd_comdata(0x32, 0);
     delay_lcd(30000);
-    lcd_comdata(0x28, 0);   //function set
+    lcd_comdata(0x28, 0);   //function set - 4 bit, 2 line format
     delay_lcd(30000);
-    lcd_comdata(0x0c, 0);   //display on cursor off
+    lcd_comdata(0x0c, 0);   //display on, cursor off
     delay_lcd(800);
     lcd_comdata(0x06, 0);   //entry mode set increment cursor right
     delay_lcd(800);
@@ -54,11 +50,10 @@ void lcd_init(void){
 }
 void lcd_puts(unsigned char* buf1){
     unsigned int i = 0;
-    unsigned int temp3;
-    while(buf[i] != '\0'){
-        temp3 = buf1[i++];
-        lcd_comdata(temp3, 1);
-        if(i == 16)
+    while(buf1[i] != '\0'){
+        lcd_comdata(buf1[i], 1);
+        i++;
+        if(i == 16) //move cursor to 2nd line
             lcd_comdata(0xc0, 0);
     }
     return;
