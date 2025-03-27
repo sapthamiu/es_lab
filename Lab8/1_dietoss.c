@@ -54,30 +54,32 @@ void lcd_puts(unsigned char* str){
     }
 }
 void roll_die(void){
+		unsigned char msg1[] = {"Die Toss: "};
     die_roll = (rand() % 6) + 1;
     lcd_comdata(0x01, 0);   //clear screen
     delay_lcd(3000);
     lcd_comdata(0x80, 0);   //move cursor to first line
-    lcd_puts("Die Toss: ");
+    lcd_puts(&msg1[0]);
     lcd_comdata(0xC0, 0);   //move cursor to 2nd line
     lcd_comdata(die_roll + '0', 1); //display after converting to char
 }
 
 int main(void){
+		unsigned char inst[] = {"Press SW2"};
     SystemInit();
     SystemCoreClockUpdate();
     lcd_init();
-    LPC_PINCON->PINSEL4 &= ~(3 << 20);  //P2.10 as GPIO
-    LPC_GPIO2->FIODIR &= ~(1 << 10);    //P2.10 as input
+    LPC_PINCON->PINSEL4 &= ~(3 << 24);  //P2.12 as GPIO
+    LPC_GPIO2->FIODIR &= ~(1 << 12);    //P2.12 as input
     lcd_comdata(0x80, 0);
     delay_lcd(800);
-    lcd_puts("Press SW2");
+    lcd_puts(&inst[0]);
     while(1){
-        if(!(LPC_GPIO2->FIOPIN & (1 << 10))){
+        if(!(LPC_GPIO2->FIOPIN & (1 << 12))){
             delay_lcd(50000);
-            if(!(LPC_GPIO2->FIOPIN & (1 << 10))){
+            if(!(LPC_GPIO2->FIOPIN & (1 << 12))){
                 roll_die();
-                while(!(LPC_GPIO2->FIOPIN & (1 << 10)));
+                while(!(LPC_GPIO2->FIOPIN & (1 << 12)));
             }
         }
     }
