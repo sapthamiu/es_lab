@@ -18,7 +18,6 @@ void write(int temp2, int type){
     LPC_GPIO0->FIOSET = 1 << 28;    //enable = 1
     delay_lcd(25);
     LPC_GPIO0->FIOCLR = 1 << 28; //enable = 0
-    return;
 }
 void lcd_comdata(int temp1, int type){
     int temp2 = (temp1 & 0xF0) << 19;   // move data 26-8+1 times (higher nibble)

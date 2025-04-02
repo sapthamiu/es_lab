@@ -35,33 +35,32 @@ int main(void){
     delay_lcd(800);
     lcd_puts(&msg1[0]);
     while(1){
-			while(1){
-        //flag = 0;
-        for(row = 1; row < 5; row++){
-            switch (row) {
-                case 1: var1 = 0x00000400; break;
-                case 2: var1 = 0x00000800; break;
-                case 3: var1 = 0x00001000; break;
-                case 4: var1 = 0x00002000; break;
+        while(1){
+            for(row = 1; row < 5; row++){
+                switch (row) {
+                    case 1: var1 = 0x00000400; break;   //P2.10
+                    case 2: var1 = 0x00000800; break;   //P2.11
+                    case 3: var1 = 0x00001000; break;   //P2.12
+                    case 4: var1 = 0x00002000; break;   //P2.13
+                }
+                temp = var1;
+                LPC_GPIO2->FIOCLR = 0x00003C00; //clear previous row selection
+                LPC_GPIO2->FIOSET = var1;   //enable the row
+                flag = 0;
+                scan();
+                if(flag == 1)
+                    break;
             }
-            temp = var1;
-            LPC_GPIO2->FIOCLR = 0x00003C00;
-            LPC_GPIO2->FIOSET = var1;   //enable the row
-            flag = 0;
-            scan();
             if(flag == 1)
                 break;
         }
-        if(flag == 1)
-             break;
-				for(i = 0; i < 16; i++)
-						if(key == scan_code[i]){
-								key = ascii_code[i];
-								break;
-						}
-				lcd_comdata(0xc0,0);
-				delay_lcd(800);
-				lcd_puts(&key);
-        }
+        for(i = 0; i < 16; i++)
+            if(key == scan_code[i]){
+                key = ascii_code[i];
+                break;
+            }
+        lcd_comdata(0xc0,0);
+        delay_lcd(800);
+        lcd_puts(&key);
     }
 }
