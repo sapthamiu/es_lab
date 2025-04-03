@@ -27,26 +27,22 @@ void delayms(unsigned int ms){
     LPC_TIM0->TCR = 0x0;            //disable timer
 }
 void initKB(){
-    LPC_GPIO2->FIODIR &= 0x0F;    //P0.0 to P0.3 as i/p (rows)
-    LPC_GPIO1->FIODIR |= ~(0xF87FFFFF);    //P0.4 to P0.4 as o/p (cols)
+    LPC_GPIO0->FIODIR |= 0x0F00;    //P0.8 to P0.11 rows (o/p)
+    LPC_GPIO0->FIODIR &= ~(0x0F0);   //P0.4 to P0.7 as cols (i/p)
 }
 
-void scan(){
-    int col, row;
-    //scan row 0 for key presses
-    for(col = 0; col < 4; col++){
-        LPC_GPIO->FIOSET = (1 << (col + 4));    //set column high
-        for(row = 0; row < 4; row++)
-            if(!(LPC_GPIO0->FIOPIN & (1 << row))){   //check if key is pressed
-                LPC_GPIO0->FIOCLR = (1 << (col + 4));   //clear column
-                return row + col * 4;           //return key number
-            }
-        LPC_GPIO0->FIOCLR = (1 << (col + 4));   //clear column
-    }
-    return -1;
+int scan(){
+		int pressed;
+		LPC_GPIO0->FIOSET = (0x1<<8);	//set row 1 
+		pressed = LPC_GPIO0->FIOPIN;
+		pressed &= 0xF0;		//mask and check which key is pressed
+		pressed >>= 4;			//shift to LSB
+		return pressed;
 }
 
 int main(){
+		SystemInit();
+		SystemCoreClockUpdate();
     initPWM();
     initKB();
 
@@ -54,13 +50,13 @@ int main(){
         char key = scan();
         unsigned int pwmVal = 0;
         switch(key){
-            case 0: pwmVal = PWM_PRD * 0.1;
+            case 1: pwmVal = PWM_PRD * 0.1;
                     break;
-            case 1: pwmVal = PWM_PRD * 0.25;
+            case 2: pwmVal = PWM_PRD * 0.25;
                     break;
-            case 2: pwmVal = PWM_PRD * 0.5;
+            case 4: pwmVal = PWM_PRD * 0.5;
                     break;
-            case 3: pwmVal = PWM_PRD * 0.75;
+            case 8: pwmVal = PWM_PRD * 0.75;
                     break;
             default: pwmVal = 0;
                     break;
