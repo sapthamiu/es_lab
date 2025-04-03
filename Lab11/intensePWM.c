@@ -34,7 +34,7 @@ int main(){
 
     while(1){
         updatePW(pws[count]);
-        delayms(10000);
+        delayms(100000);
         if(count == (n-1) || count == 0)
             dir = !dir;
         if(dir) count--;
