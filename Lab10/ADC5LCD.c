@@ -4,21 +4,29 @@
 #include "LCDmessage.c"
 #define Vref 3.3
 #define full_scale 0xFFF    //12 bit ADC
+
+void ADCinit(){
+    LPC_SC->PCONP |= (1 << 15); //power for GPIO block
+    LPC_PINCON->PINSEL3 |= (0x3 << 14); //P1.31 as AD0.5
+    LPC_SC->PCONP |= (1 << 12); //enable ADC
+}
+unsigned long readADC(unsigned char channel){
+    LPC_ADC->ADCR = (1 << channel) | (1 << 21) | (1 << 24); //start conversion
+    while(!(LPC_ADC->ADDR5 & 0x80000000));  //wait until conversion is done
+    return (LPC_ADC->ADDR5 >> 4) & 0xFFF;   //get the 12 bit result
+}
 int main(){
     unsigned long adcVal;
     unsigned int i;
     float Vin;
-    char v[20], dval[20];
+    char volt[20], dval[20];
     unsigned char msg3[] = "Analog I/p: ";
     unsigned char msg4[] = "ADC o/p: ";
     SystemInit();
     SystemCoreClockUpdate();
-    LPC_SC->PCONP |= (1 << 15); //power for GPIO block
-    lcd_init();
-    LPC_PINCON->PINSEL3 |= 0xc0000000;  //P1.31 as AD0.5
-    LPC_SC->PCONP |= (1 << 12);         //enable the peripheral ADC
-    SystemCoreClockUpdate();
+    ADCinit();
 
+    lcd_init();
     lcd_comdata(0x80, 0);
     delay_lcd(800);
     lcd_puts(msg3);
@@ -27,17 +35,14 @@ int main(){
     lcd_puts(msg4);
 
     while(1){
-        LPC_ADC->ADCR = (1 << 5) | (1 << 21) | (1 << 24);   //ADC0.5, start conversion
-        while(!(LPC_ADC->ADDR5 & 0x80000000));  //wait till done bit is 1 (conversion complete)
-        adcVal = LPC_ADC->ADDR5;
-        adcVal >>= 4; //get the 12 bit result
+        adcVal = readADC(5);
         Vin = (((float) adcVal * Vref)) / (float) full_scale; //calculate voltage
-        sprintf(v, "%.2f V", Vin);
-        sprintf(dval, "%x", adcVal);
-        for(i = 0; i < 2000; i++);
+        sprintf(volt, "%.2f V", Vin);
+        sprintf(dval, "%lu", adcVal);
+        // for(i = 0; i < 2000; i++);
         lcd_comdata(0x89, 0);
         delay_lcd(800);
-        lcd_puts(v);
+        lcd_puts(volt);
 
         lcd_comdata(0xC8, 0);
         delay_lcd(800);
