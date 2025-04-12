@@ -60,7 +60,7 @@ int main(){
                 LPC_GPIO2->FIOCLR = BIT(0xF, 10);   //clear previous selection
                 LPC_GPIO2->FIOSET = rowpress;       //activate row
                 flag = 0;
-                key = scan(rowpress);               //search for pressed column
+                key = scan(rowpress);               //search for pressed column in the current row
                 if(flag == 1) break;
             }
             if(flag == 1) break;
