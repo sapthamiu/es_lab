@@ -6,7 +6,7 @@ void initPWM(){
     LPC_PINCON->PINSEL3 |= 0x8000;  //PWM1.4 o/p for P1.23 func 2
     LPC_PWM1->PCR = 0x1000;         //enable PWM1.4
     LPC_PWM1->PR = 0;
-    LPC_PWM1->MR0 = PWM_PRD;          //period = 10ms if Pclk = Cclk/4
+    LPC_PWM1->MR0 = PWM_PRD;         //period = 10ms if Pclk = Cclk/4
     LPC_PWM1->MCR = (1 << 1);       //reset PWM TC on MR0 match
     LPC_PWM1->LER = 0xFF;           //update values in MR0 and MR1
     LPC_PWM1->TCR = 0x2;            //reset counter TC and PC

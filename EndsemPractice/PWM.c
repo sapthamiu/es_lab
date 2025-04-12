@@ -4,7 +4,7 @@
 void initPWM(){
     LPC_PINCON->PINSEL3 |= BIT(1, 15);  //P1.23 (01) as PWM1.4 
     LPC_PWM1->PCR = BIT(1, 12);         //enable PWM1.4 o/p
-    LPC_PWM1->PR = 0;                   //no prescaler
+    LPC_PWM1->PR = 0;                   //no prescaler (Pclk = Tclk)
     LPC_PWM1->MR0 = 30000;              //PWM period = 10ms 
     LPC_PWM1->MR4 = 0;                  //start with 0% duty
     LPC_PWM1->MCR = BIT(1, 1);          //reset on MR0 match
@@ -29,18 +29,20 @@ void delayms(unsigned int ms){
 
 int main(){
     int pws[] = {0, 3000, 6000, 9000, 12000, 15000, 18000, 21000, 24000, 27000};
-    const int n = 10;
-    int count = 1;
-    int dir = 0;                        //0 = increasing brightness, 1 = decreasing
-    
+    const int n = 10;    
     initPWM();
 
-    while(1){
-        updatePW(pws[count]);
-        delayms(500);
-        if(count == (n-1) || count == 0)
-            dir = !dir;
-        if(dir) count--;
-        else count++;
+    while (1) {
+        // Increasing brightness
+        for (int i = 1; i < n; i++) {
+            updatePW(pws[i]);
+            delayms(500);
+        }
+
+        // Decreasing brightness
+        for (int i = n - 2; i > 0; i--) {
+            updatePW(pws[i]);
+            delayms(500);
+        }
     }
 }
